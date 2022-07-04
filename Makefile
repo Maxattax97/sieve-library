@@ -1,4 +1,6 @@
-all: build
+all: build check test
+
+.PHONY: build pull push check test
 
 build:
 	docker build . -t sieve:latest
