@@ -37,7 +37,7 @@ def preprocess_email(text, filter_words=None):
     if filter_words is None:
         filter_words = []
 
-    # Remove non-alphanumeric characters
+    # Remove non-alphabet characters
     text = re.sub(r"[^a-zA-Z]+", " ", text)
 
     # Convert to lowercase
@@ -52,7 +52,7 @@ def preprocess_email(text, filter_words=None):
     words = [
         word
         for word in words
-        if word not in stop_words and word not in filter_words and len(word) > 4
+        if (word not in stop_words) and (word not in filter_words) and (len(word) >= 4) and (len(word) <= 12)
     ]
 
     # Stemming
@@ -148,16 +148,17 @@ def plot_clusters_pca_3d(X, labels, num_clusters):
 
 
 # Main processing
-directory = "data"  # Replace with your directory
+directory = "gmail"  # Replace with your directory
 filter_words = [
-    "enron",
-    "subject",
-    "http",
-    "www",
-    "net",
-    "com",
+    # "enron",
+    # "subject",
+    # "http",
+    # "www",
+    # "net",
+    # "com",
 ]
 
+print("
 emails = load_emails(directory)
 preprocessed_emails = [preprocess_email(email, filter_words) for email in emails]
 
@@ -166,14 +167,14 @@ vectorizer = TfidfVectorizer(max_features=1000, ngram_range=(1, 2))
 X = vectorizer.fit_transform(preprocessed_emails)
 
 # Determine the optimal number of clusters
-elbow_method(X)
-silhouette_analysis(X)
+elbow_method(X) # 4 and 13
+silhouette_analysis(X) # 5 and 10
 
 # Suggest possible topics
 suggest_topics(X, vectorizer.get_feature_names_out(), num_topics=5)
 
 # Apply K-Means clustering
-num_clusters = 9
+num_clusters = 8
 kmeans = KMeans(n_clusters=num_clusters, random_state=42)
 kmeans.fit(X)
 

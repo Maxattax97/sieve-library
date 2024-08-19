@@ -2,13 +2,30 @@
 
 Snippet library of validated Sieve email filters (RFC 5228).
 
+# Installation
+
+You will need the `pg_config` binary to instal the necessary Postgres
+libraries. On Fedora, you can install this with the following command:
+
+```
+sudo dnf install libpq-devel
+```
+
+```
+pip3 -m venv venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+
+docker-compose up -d
+```
+
 # Usage
 
 ```
 make
 ```
 
-## Design Philosophy
+# Design Philosophy
 
 - When in doubt, default to expiring emails. Few things truly need to be kept indefinitely.
   - As of 03-18-2021, ProtonMail supports an undocumented maximum expiration of 120 days. Setting a value greater than 120 days will be silently accepted with no server side errors, defaulting to the max of 120 days. Keep this in mind.
@@ -25,7 +42,7 @@ make
 - IMAP uses [modified UTF-7](https://tools.ietf.org/html/rfc5228#section-2.1). Ensure folder and label names are in the [US-ASCII](https://www.charset.org/charsets/us-ascii) range.
 - You can only test so much before going to "prod". Ensure sieves handling ~critical emails explicitly check for _and_ resolve unintended states, such as expirations.
 
-## Useful Links
+# Useful Links
 
 - [ProtonMail Sieve Docs](https://protonmail.com/support/knowledge-base/sieve-advanced-custom-filters/)
 - [Sieve Tutorial](https://p5r.uk/blog/2011/sieve-tutorial.html)
@@ -36,14 +53,14 @@ make
 - [check-sieve](https://github.com/dburkart/check-sieve)
 - [an inspiration for this repo](https://github.com/SoMuchToGrok/email-sieves)
 
-## Testing
+# Testing
 
 - Supply `.eml` samples for unit testing
   - Ensure NO personally identifiable information is pasted into this tool.
 - Pro Tip - this app is not aware of the "vnd.proton.expire" package. Remove it when testing with this app.
 - When adding the sieve to ProtonMail, basic linting is performed server-side.
 
-## Deployment
+# Deployment
 
 - Manually copy and paste the definitions into [ProtonMail Filters](https://beta.protonmail.com/u/0/settings/filters#custom)
   - "Ads" sieve is executed 1st (00)
@@ -51,7 +68,7 @@ make
   - "Statements" sieve is executed 3rd (02)
   - "Orders and Shipping" sieve is executed last (zz)
 
-## To Do
+# To Do
 
 - Improve local testing by hooking up [sieve script editor](https://github.com/thsmi/sieve) to [docker-mailserver](https://github.com/docker-mailserver/docker-mailserver/wiki/Configure-Sieve-filters) [local dev]
 - Add Travis PR tests which check for syntax errors [CI]

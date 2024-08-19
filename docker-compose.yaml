@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: email-analysis-db
+    environment:
+      POSTGRES_USER: sieve
+      POSTGRES_PASSWORD: Fate9chap9priest
+      POSTGRES_DB: sieve
+    volumes:
+      - sieve_db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  sieve_db:
+    driver: local
