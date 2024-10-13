@@ -3,6 +3,30 @@ require ["fileinto", "imap4flags", "vnd.proton.expire", "variables"];
 
 set "eva" "unset";
 
+###########
+# Flagged #
+###########
+
+if anyof (
+    address :is "from" "artemchuk.tetiana@gmail.com",
+    address :is "from" "alanrocull@gmail.com",
+    address :is "from" "masteralan2001@gmail.com",
+    address :is "from" "james.ocull@gmail.com",
+    address :is "from" "houndeyex@gmail.com",
+    address :is "from" "ldocull@gmail.com",
+    address :is "from" "larry.ocull@ldo-systems.com",
+    address :is "from" "larry.ocull@stryker.com",
+    address :is "from" "wr9r.usa@stryker.com",
+    address :is "from" "amocull@gmail.com",
+    address :is "from" "hrocull@gmail.com",
+    address :is "from" "hray.hc@gmail.com"
+  )
+{
+  # This adds a star:
+  addflag "\\Flagged";
+  set "eva" "false";
+}
+
 ########
 # Spam #
 ########
@@ -14,7 +38,7 @@ if anyof (
   fileinto "Spam";
   set "eva" "false";
 }
-elsif anyof (header :contains "subject" "Privacy Policy")
+elsif anyof (header :contains "subject" "Privacy Policy", header :contains "subject" "Terms of Service", header :contains "subject" "Legal Agreements", header :contains "subject" "Disclosure")
 {
   fileinto "Trash";
   set "eva" "false";
@@ -52,30 +76,43 @@ if anyof (
     address :domain "from" "fidelity.com",
     address :contains "from" "chase",
     address :contains "from" "CenterPointEnergy",
+    address :contains "from" "centerpoint.energy",
     address :domain "from" "duke-energyalert.com",
     address :contains "from" "huntington",
     address :domain "from" "venmo.com",
+    address :domain "from" "mohela.studentaid.gov",
+    header :contains "subject" "Payment confirmation",
+    header :contains "subject" "Payment Received",
+    address :domain "from" "notification.capitalone.com",
+    header :contains "subject" "online bill is ready",
     allof (address :is "from" "service@sfmc.personalwealth.empower.com", header :contains "subject" "Your daily financial monitor")
 ) {
   fileinto "Finance";
   set "eva" "false";
 
   if anyof (
-      header :contains "subject" "Your Monthly Statement is Available",
-      header :contains "subject" "Review your recent activity",
       header :contains "subject" "Thank you for your payment",
       header :contains "subject" "Payment confirmation",
-      header :contains "subject" "transaction history",
-      header :contains "subject" "Funds invested"
+      header :contains "subject" "Funds invested",
+      header :contains "subject" "Payment Received"
   ) {
-      fileinto "Trash";
+      fileinto "Receipts";
   }
-
-  if anyof (
+  elsif anyof (
       header :contains "subject" "Scheduled transfer created",
-      header :contains "subject" "IBKR FYI"
+      header :contains "subject" "IBKR FYI",
+      header :contains "subject" "Your Payment is Due Soon",
+      header :contains "subject" "payment reminder"
   ) {
     expire "day" "3";
+  }
+  elsif anyof (
+      header :contains "subject" "Your Monthly Statement is Available",
+      header :contains "subject" "Review your recent activity",
+      header :contains "subject" "transaction history",
+      header :contains "subject" "bill is ready"
+  ) {
+      fileinto "Trash";
   }
 }
 
@@ -206,7 +243,9 @@ elsif allof (address :is "from" "venmo@venmo.com", header :contains "subject" "p
   # Venmo
   fileinto "Receipts";
   fileinto "Finance";
-  set "eva" "false";
+
+  # Enabling this for EVA because it's how I often pay contractors.
+  set "eva" "true";
 }
 elsif address :is "from" "admin@indyvineyard.org"
 {
@@ -298,6 +337,18 @@ elsif allof (address :is "from" "service@paypal.com", header :contains "subject"
   fileinto "Finance";
   set "eva" "false";
 }
+elsif anyof (header :contains "subject" "order confirmed")
+{
+  # AliExpress
+  fileinto "Receipts";
+  set "eva" "true";
+}
+elsif allof (address :is "from" "noreply@steampowered.com", header :contains "subject" "Thank you for your Steam purchase!")
+{
+  fileinto "Receipts";
+  set "eva" "false";
+}
+
 
 #####################################
 # Notifications, News, and Expiring #
@@ -307,28 +358,43 @@ if allof (address :domain "from" "amazon.com")
 {
   # Amazon
   fileinto "Notification";
-  expire "day" "7";
+  expire "day" "3";
+  set "eva" "true";
+}
+elsif anyof (address :domain "from" "notice.aliexpress.com")
+{
+  # AliExpress
+  fileinto "Notification";
+  expire "day" "3";
   set "eva" "true";
 }
 elsif allof (address :is "from" "dailybriefing@thomsonreuters.com")
 {
   # Reuters
   fileinto "News";
-  expire "day" "5";
+  fileinto "Newsletters";
   set "eva" "false";
 }
 elsif allof (address :domain "from" "nomadcapitalist.com")
 {
   # Nomad Capitalist
   fileinto "News";
-  expire "day" "5";
+  fileinto "Newsletters";
   set "eva" "false";
 }
-elsif anyof (header :contains "subject" "Sign-in attempt", header :contains "subject" "device added", header :contains "subject" "Verification Code", header :contains "subject" "sign in")
+elsif anyof
+  (
+    header :contains "subject" "Sign-in attempt",
+    header :contains "subject" "device added",
+    header :contains "subject" "Verification Code",
+    header :contains "subject" "sign in",
+    header :contains "subject" "Verify Your",
+    header :contains "subject" "Verify your email address"
+  )
 {
   # Security
   fileinto "Notification";
-  expire "day" "3";
+  expire "day" "1";
   set "eva" "false";
 }
 elsif allof (address :is "from" "appointmentreminders@therapyportal.com", header :contains "subject" "Appointment Reminder") {
@@ -347,7 +413,7 @@ elsif allof (address :domain "from" "attestation.app", header :contains "subject
 elsif address :is "from" "kusterchronicle@send.mailchimpapp.com" {
   # Kuster Chronicle
   fileinto "News";
-  expire "day" "7";
+  fileinto "Newsletters";
   set "eva" "false";
 }
 elsif anyof (header :contains "subject" "new device")
@@ -364,6 +430,55 @@ elsif allof (address :domain "from" "steampowered.com", header :contains "subjec
   expire "day" "7";
   set "eva" "false";
 }
+# tim ferriss "max.ocull+tim.ferriss@protonmail.com"
+# empower weekly report: "charges this week."
+elsif anyof (address :is "to" "max.ocull+tim.ferriss@protonmail.com")
+{
+  # Tim Ferriss
+  fileinto "News";
+  fileinto "Newsletters";
+  set "eva" "false";
+}
+elsif anyof (header :contains "subject" "charges this week.")
+{
+  # Empower Weekly Report
+  fileinto "News";
+  fileinto "Finance";
+  expire "day" "3";
+}
+elsif anyof (address :is "from" "maxocull.com@gmail.com")
+{
+  # Home Lab
+  fileinto "Notification";
+  fileinto "Software";
+  expire "day" "1";
+  set "eva" "false";
+}
+elsif anyof (address :is "from" "lwn@lwn.net")
+{
+  # LWN
+  fileinto "News";
+  fileinto "Newsletters";
+  set "eva" "false";
+}
+elsif anyof (address :is "from" "noreply@camelcamelcamel.com")
+{
+  # Camel Camel Camel
+  fileinto "Notification";
+  expire "day" "1";
+
+  # Let EVA know about this so we can snatch it up.
+  set "eva" "true";
+}
+elsif anyof (address :domain "from" "lists.archlinux.org")
+{
+  # Arch Security
+  fileinto "News";
+  fileinto "Software";
+  fileinto "Newsletters";
+  set "eva" "false";
+}
+
 
 ####################
 # Exclude from EVA #
