@@ -375,6 +375,13 @@ elsif allof (address :is "from" "dailybriefing@thomsonreuters.com")
   fileinto "Newsletters";
   set "eva" "false";
 }
+elsif allof (address :domain "from" "reason.com")
+{
+  # Reason
+  fileinto "News";
+  fileinto "Newsletters";
+  set "eva" "false";
+}
 elsif allof (address :domain "from" "nomadcapitalist.com")
 {
   # Nomad Capitalist
