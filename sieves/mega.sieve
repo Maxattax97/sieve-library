@@ -27,6 +27,16 @@ if anyof (
   set "eva" "false";
 }
 
+###########
+# Privacy #
+###########
+
+if address :domain "to" "passinbox.com" {
+  # TODO: Flag as sensitive?
+  set "eva" "false";
+}
+
+
 ########
 # Spam #
 ########
