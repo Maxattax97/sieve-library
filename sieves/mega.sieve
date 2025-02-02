@@ -168,6 +168,18 @@ if anyof (
   }
 }
 
+# Schaaf CPA
+if address :domain "from" "schaafcpa.com" {
+  fileinto "Finance";
+  fileinto "Special";
+
+  # Adds a star
+  addflag "\\Flagged";
+
+  set "eva" "false";
+}
+
+
 ##########
 # Health #
 ##########
@@ -238,8 +250,8 @@ if allof (
 if anyof (
     header :contains "subject" "Tell us how we did",
     header :contains "subject" "Survey Request",
-    header :contains "subject" "Customer Feedback",
-    header :contains "subject" "Requests Your Feedback"
+    header :contains "subject" "feedback",
+    header :contains "subject" "Feedback"
   )
 {
   fileinto "Trash";
@@ -410,6 +422,16 @@ elsif allof (address :is "from" "noreply@steampowered.com", header :contains "su
 {
   fileinto "Receipts";
   set "eva" "false";
+}
+elsif allof (address :domain "from" "messaging.squareup.com", header :contains "subject" "Receipt")
+{
+  # Square vendors
+  fileinto "Receipts";
+}
+elsif allof (address :domain "from" "glossgenius.com", header :contains "subject" "receipt")
+{
+  # Gloss vendors (like barbers)
+  fileinto "Receipts";
 }
 
 
